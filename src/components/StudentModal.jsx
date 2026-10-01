@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../supabase'
 import { formatDateTime, formatDate, shouldShowVideoEditingAlert, countAttendance } from '../utils'
-import { TERMS } from '../config'
+import { TERM_OPTIONS } from '../config'
 import LessonsTab from './LessonsTab'
 import ProgressTab from './ProgressTab'
 import VideoTab from './VideoTab'
@@ -66,7 +66,7 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
   const handleAddTerm = async () => {
     // Find next term not yet used
     const usedTerms = terms.map(t => t.term_number)
-    const nextTerm = TERMS.find(t => !usedTerms.includes(t))
+    const nextTerm = TERM_OPTIONS.find(t => !usedTerms.includes(t))
     if (!nextTerm) { toast.error('All terms already created'); return }
 
     setAddingTerm(true)
@@ -126,7 +126,6 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
             <span className="modal-title">{student.name}</span>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <span className="tag tag-accent">{student.program}</span>
-              <span className="tag">{student.foundation}</span>
               {termData && (
                 <span className="tag" style={{ color: 'var(--text-secondary)' }}>
                   {termData.term_number}

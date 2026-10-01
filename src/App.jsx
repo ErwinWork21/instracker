@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
 import { countAttendance, shouldShowVideoEditingAlert, formatDateTime } from './utils'
-import { PROGRAMS, FOUNDATIONS, TERMS } from './config'
+import { PROGRAMS } from './config'
 import Dashboard from './components/Dashboard'
 import StudentModal from './components/StudentModal'
 import AddStudentModal from './components/AddStudentModal'
@@ -16,7 +16,6 @@ export default function App() {
   // Filter state
   const [search, setSearch] = useState('')
   const [filterProgram, setFilterProgram] = useState('')
-  const [filterFoundation, setFilterFoundation] = useState('')
   const [filterTerm, setFilterTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterAlert, setFilterAlert] = useState('')
@@ -76,7 +75,6 @@ export default function App() {
   const filtered = enrichedStudents.filter(s => {
     if (search && !s.name.toLowerCase().includes(search.toLowerCase())) return false
     if (filterProgram && s.program !== filterProgram) return false
-    if (filterFoundation && s.foundation !== filterFoundation) return false
     if (filterTerm && s.activeTerm?.term_number !== filterTerm) return false
     if (filterStatus && s.activeTerm?.status !== filterStatus) return false
     if (filterAlert === 'progress' && !s.hasProgressAlert) return false
@@ -121,8 +119,6 @@ export default function App() {
           setSearch={setSearch}
           filterProgram={filterProgram}
           setFilterProgram={setFilterProgram}
-          filterFoundation={filterFoundation}
-          setFilterFoundation={setFilterFoundation}
           filterTerm={filterTerm}
           setFilterTerm={setFilterTerm}
           filterStatus={filterStatus}

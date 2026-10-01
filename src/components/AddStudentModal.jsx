@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { PROGRAMS, FOUNDATIONS, TERMS } from '../config'
+import { PROGRAMS, TERM_OPTIONS } from '../config'
 import toast from 'react-hot-toast'
 
 export default function AddStudentModal({ onClose, onSaved }) {
   const [name, setName] = useState('')
   const [program, setProgram] = useState(PROGRAMS[0])
-  const [foundation, setFoundation] = useState(FOUNDATIONS[0])
-  const [termNumber, setTermNumber] = useState(TERMS[0])
+  const [termNumber, setTermNumber] = useState(TERM_OPTIONS[0])
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
@@ -17,7 +16,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
       // 1. Create student (no active_term_id yet)
       const { data: studentData, error: studentErr } = await supabase
         .from('students')
-        .insert({ name: name.trim(), program, foundation })
+        .insert({ name: name.trim(), program })
         .select()
         .single()
       if (studentErr) throw studentErr
@@ -98,17 +97,11 @@ export default function AddStudentModal({ onClose, onSaved }) {
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Foundation</label>
-              <select className="select" value={foundation} onChange={e => setFoundation(e.target.value)}>
-                {FOUNDATIONS.map(f => <option key={f} value={f}>{f}</option>)}
+              <label className="form-label">Starting Term</label>
+              <select className="select" value={termNumber} onChange={e => setTermNumber(e.target.value)}>
+                {TERM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Starting Term</label>
-            <select className="select" value={termNumber} onChange={e => setTermNumber(e.target.value)}>
-              {TERMS.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
           </div>
         </div>
         <div className="modal-footer">

@@ -2,7 +2,7 @@ import { countAttendance } from '../utils'
 
 export default function StudentCard({ student, onClick }) {
   const {
-    name, program, foundation, activeTerm,
+    name, program, activeTerm,
     attendanceCount, hasProgressAlert, hasVideoAlert,
   } = student
 
@@ -25,8 +25,6 @@ export default function StudentCard({ student, onClick }) {
         <div className="student-card-name">{name}</div>
         <div className="student-card-meta">
           <span>{program || '—'}</span>
-          <span className="dot">•</span>
-          <span>{foundation || '—'}</span>
           <span className="dot">•</span>
           <span>{termLabel}</span>
         </div>

@@ -1,11 +1,10 @@
-import { PROGRAMS, FOUNDATIONS, TERMS } from '../config'
+import { PROGRAMS, TERM_OPTIONS } from '../config'
 import StudentCard from './StudentCard'
 
 export default function Dashboard({
   students, allStudents, loading,
   search, setSearch,
   filterProgram, setFilterProgram,
-  filterFoundation, setFilterFoundation,
   filterTerm, setFilterTerm,
   filterStatus, setFilterStatus,
   filterAlert, setFilterAlert,
@@ -37,13 +36,9 @@ export default function Dashboard({
           <option value="">All Programs</option>
           {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
-        <select className="select" value={filterFoundation} onChange={e => setFilterFoundation(e.target.value)}>
-          <option value="">All Foundations</option>
-          {FOUNDATIONS.map(f => <option key={f} value={f}>{f}</option>)}
-        </select>
         <select className="select" value={filterTerm} onChange={e => setFilterTerm(e.target.value)}>
           <option value="">All Terms</option>
-          {TERMS.map(t => <option key={t} value={t}>{t}</option>)}
+          {TERM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <select className="select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="">All Statuses</option>
