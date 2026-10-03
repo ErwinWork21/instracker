@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS students (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name          TEXT NOT NULL,
   program       TEXT NOT NULL CHECK (program IN ('Kinder', 'Junior')),
-  foundation    TEXT NOT NULL CHECK (foundation IN ('Foundation 1', 'Foundation 2')),
   active_term_id UUID,   -- FK added after terms table
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
