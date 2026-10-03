@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 
 export default function AddStudentModal({ onClose, onSaved }) {
   const [name, setName] = useState('')
+  const [program, setProgram] = useState(PROGRAMS[0])
   const [termNumber, setTermNumber] = useState(TERM_OPTIONS[0])
   const [saving, setSaving] = useState(false)
 
@@ -15,7 +16,7 @@ export default function AddStudentModal({ onClose, onSaved }) {
       // 1. Create student (no active_term_id yet)
       const { data: studentData, error: studentErr } = await supabase
         .from('students')
-        .insert({ name: name.trim() })
+        .insert({ name: name.trim(), program })
         .select()
         .single()
       if (studentErr) throw studentErr
@@ -88,11 +89,19 @@ export default function AddStudentModal({ onClose, onSaved }) {
               autoFocus
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Starting Term</label>
-            <select className="select" value={termNumber} onChange={e => setTermNumber(e.target.value)}>
-              {TERM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+          <div className="two-col">
+            <div className="form-group">
+              <label className="form-label">Program</label>
+              <select className="select" value={program} onChange={e => setProgram(e.target.value)}>
+                {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Starting Term</label>
+              <select className="select" value={termNumber} onChange={e => setTermNumber(e.target.value)}>
+                {TERM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
           </div>
         </div>
         <div className="modal-footer">
