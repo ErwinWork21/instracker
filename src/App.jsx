@@ -27,7 +27,7 @@ export default function App() {
         .from('students')
         .select(`
           *,
-          terms (
+          terms!terms_student_id_fkey (
             *,
             lessons ( * ),
             progress_updates ( * ),

@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS students (
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Drop the old foundation column if it still exists from a previous run
+ALTER TABLE students DROP COLUMN IF EXISTS foundation;
+
 -- =============================================
 -- TERMS
 -- =============================================
@@ -31,12 +34,21 @@ CREATE TABLE IF NOT EXISTS terms (
   completed_at TIMESTAMPTZ
 );
 
--- Now add FK constraint on students.active_term_id
-ALTER TABLE students
-  ADD CONSTRAINT fk_students_active_term
-  FOREIGN KEY (active_term_id)
-  REFERENCES terms(id)
-  ON DELETE SET NULL;
+-- Now add FK constraint on students.active_term_id idempotently
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'fk_students_active_term' 
+      AND table_name = 'students'
+  ) THEN
+    ALTER TABLE students
+      ADD CONSTRAINT fk_students_active_term
+      FOREIGN KEY (active_term_id)
+      REFERENCES terms(id)
+      ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- =============================================
 -- LESSONS
