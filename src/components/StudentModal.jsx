@@ -18,6 +18,7 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
   const [termData, setTermData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [addingTerm, setAddingTerm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const loadStudentData = useCallback(async () => {
     setLoading(true)
@@ -110,6 +111,22 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
     }
   }
 
+  const handleDeleteStudent = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${student.name}? This will permanently delete all their terms, lessons, and records.`)) return
+    
+    setDeleting(true)
+    try {
+      const { error } = await supabase.from('students').delete().eq('id', student.id)
+      if (error) throw error
+      toast.success(`${student.name} deleted successfully!`)
+      onRefresh()
+    } catch (err) {
+      console.error(err)
+      toast.error('Error deleting student: ' + err.message)
+      setDeleting(false)
+    }
+  }
+
   const lessons = termData?.lessons?.sort((a, b) => a.lesson_number - b.lesson_number) || []
   const attendanceCount = countAttendance(lessons)
   const progressUpdate = termData?.progress_updates?.[0]
@@ -133,7 +150,17 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
               )}
             </div>
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button 
+              className="btn btn-sm btn-ghost" 
+              style={{ color: '#ef4444' }} 
+              onClick={handleDeleteStudent} 
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting…' : 'Delete Student'}
+            </button>
+            <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
+          </div>
         </div>
 
         {/* Term selector */}
