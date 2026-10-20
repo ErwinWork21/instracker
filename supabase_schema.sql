@@ -112,18 +112,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_students_updated_at ON students;
 CREATE TRIGGER trg_students_updated_at
   BEFORE UPDATE ON students
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_terms_updated_at ON terms;
 CREATE TRIGGER trg_terms_updated_at
   BEFORE UPDATE ON terms
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_lessons_updated_at ON lessons;
 CREATE TRIGGER trg_lessons_updated_at
   BEFORE UPDATE ON lessons
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_teacher_notes_updated_at ON teacher_notes;
 CREATE TRIGGER trg_teacher_notes_updated_at
   BEFORE UPDATE ON teacher_notes
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -139,9 +143,41 @@ ALTER TABLE video_editing ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teacher_notes ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations for authenticated and anon (adjust for auth later)
-CREATE POLICY "allow_all_students" ON students FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_terms" ON terms FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_lessons" ON lessons FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_progress_updates" ON progress_updates FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_video_editing" ON video_editing FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all_teacher_notes" ON teacher_notes FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "allow_all_students" ON students;
+CREATE POLICY "allow_all_students" ON students FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_terms" ON terms;
+CREATE POLICY "allow_all_terms" ON terms FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_lessons" ON lessons;
+CREATE POLICY "allow_all_lessons" ON lessons FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_progress_updates" ON progress_updates;
+CREATE POLICY "allow_all_progress_updates" ON progress_updates FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_video_editing" ON video_editing;
+CREATE POLICY "allow_all_video_editing" ON video_editing FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_teacher_notes" ON teacher_notes;
+CREATE POLICY "allow_all_teacher_notes" ON teacher_notes FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+-- =============================================
+-- PERMISSIONS (GRANT)
+-- Required so anon & authenticated roles can access tables
+-- =============================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+
+GRANT ALL ON TABLE students TO anon, authenticated;
+GRANT ALL ON TABLE terms TO anon, authenticated;
+GRANT ALL ON TABLE lessons TO anon, authenticated;
+GRANT ALL ON TABLE progress_updates TO anon, authenticated;
+GRANT ALL ON TABLE video_editing TO anon, authenticated;
+GRANT ALL ON TABLE teacher_notes TO anon, authenticated;
+
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated;
+
