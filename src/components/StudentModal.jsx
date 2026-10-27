@@ -10,9 +10,13 @@ import toast from 'react-hot-toast'
 
 const TABS = ['Lessons', 'Progress Update', 'Video Editing', "Teacher's Notes"]
 
-export default function StudentModal({ student: initialStudent, onClose, onRefresh }) {
-  const [tab, setTab] = useState('Lessons')
+export default function StudentModal({ student: initialStudent, onClose, onRefresh, initialTab = 'Lessons' }) {
+  const [tab, setTab] = useState(initialTab)
   const [student, setStudent] = useState(initialStudent)
+
+  useEffect(() => {
+    if (initialTab) setTab(initialTab)
+  }, [initialTab])
   const [terms, setTerms] = useState([])
   const [selectedTermId, setSelectedTermId] = useState(initialStudent.active_term_id)
   const [termData, setTermData] = useState(null)

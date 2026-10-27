@@ -18,7 +18,25 @@ export default function App() {
   const [filterProgram, setFilterProgram] = useState('')
   const [filterTerm, setFilterTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
-  const [filterAlert, setFilterAlert] = useState('')
+  const [filterProgressUpdate, setFilterProgressUpdate] = useState('')
+  const [filterVideo, setFilterVideo] = useState('')
+  const [quickFilter, setQuickFilter] = useState('all')
+  const [modalInitialTab, setModalInitialTab] = useState('Lessons')
+
+  const handleResetFilters = () => {
+    setSearch('')
+    setFilterProgram('')
+    setFilterTerm('')
+    setFilterStatus('')
+    setFilterProgressUpdate('')
+    setFilterVideo('')
+    setQuickFilter('all')
+  }
+
+  const handleOpenStudent = (student, tab = 'Lessons') => {
+    setSelectedStudent(student)
+    setModalInitialTab(tab)
+  }
 
   const loadStudents = useCallback(async () => {
     setLoading(true)
@@ -77,10 +95,21 @@ export default function App() {
     if (filterProgram && s.program !== filterProgram) return false
     if (filterTerm && s.activeTerm?.term_number !== filterTerm) return false
     if (filterStatus && s.activeTerm?.status !== filterStatus) return false
-    if (filterAlert === 'progress' && !s.hasProgressAlert) return false
-    if (filterAlert === 'video' && !s.hasVideoAlert) return false
-    if (filterAlert === 'any' && !s.hasProgressAlert && !s.hasVideoAlert) return false
-    if (filterAlert === 'none' && (s.hasProgressAlert || s.hasVideoAlert)) return false
+
+    // Quick filters from monitor pills
+    if (quickFilter === 'progress_alert' && !s.hasProgressAlert) return false
+    if (quickFilter === 'video_alert' && !s.hasVideoAlert) return false
+    if (quickFilter === 'any_alert' && !s.hasProgressAlert && !s.hasVideoAlert) return false
+    if (quickFilter === 'no_alert' && (s.hasProgressAlert || s.hasVideoAlert)) return false
+
+    // Separated filter: Update Progress
+    if (filterProgressUpdate === 'alert' && !s.hasProgressAlert) return false
+    if (filterProgressUpdate === 'completed' && s.progressUpdate?.status !== 'Completed') return false
+
+    // Separated filter: Video Progress
+    if (filterVideo === 'alert' && !s.hasVideoAlert) return false
+    if (filterVideo === 'completed' && s.videoEditing?.status !== 'Completed') return false
+
     return true
   })
 
@@ -123,15 +152,21 @@ export default function App() {
           setFilterTerm={setFilterTerm}
           filterStatus={filterStatus}
           setFilterStatus={setFilterStatus}
-          filterAlert={filterAlert}
-          setFilterAlert={setFilterAlert}
-          onSelectStudent={setSelectedStudent}
+          filterProgressUpdate={filterProgressUpdate}
+          setFilterProgressUpdate={setFilterProgressUpdate}
+          filterVideo={filterVideo}
+          setFilterVideo={setFilterVideo}
+          quickFilter={quickFilter}
+          setQuickFilter={setQuickFilter}
+          onResetFilters={handleResetFilters}
+          onSelectStudent={handleOpenStudent}
         />
       </main>
 
       {selectedStudent && (
         <StudentModal
           student={selectedStudent}
+          initialTab={modalInitialTab}
           onClose={() => setSelectedStudent(null)}
           onRefresh={() => {
             loadStudents()
@@ -139,7 +174,6 @@ export default function App() {
           }}
           onRefreshKeepOpen={async () => {
             await loadStudents()
-            // Re-find the updated student from fresh data
           }}
         />
       )}

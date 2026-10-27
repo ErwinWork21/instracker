@@ -27,12 +27,18 @@ ALTER TABLE students DROP COLUMN IF EXISTS foundation;
 CREATE TABLE IF NOT EXISTS terms (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id   UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-  term_number  TEXT NOT NULL CHECK (term_number IN ('Term 1', 'Term 2', 'Term 3', 'Term 4')),
+  term_number  TEXT NOT NULL CHECK (term_number IN ('Foundation', 'Foundation 1', 'Foundation 2', 'Term 1', 'Term 2', 'Term 3', 'Term 4')),
   status       TEXT NOT NULL DEFAULT 'On Progress' CHECK (status IN ('On Progress', 'Completed')),
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ
 );
+
+-- Ensure terms_term_number_check constraint allows Foundation terms if table already exists
+ALTER TABLE terms DROP CONSTRAINT IF EXISTS terms_term_number_check;
+ALTER TABLE terms ADD CONSTRAINT terms_term_number_check 
+  CHECK (term_number IN ('Foundation', 'Foundation 1', 'Foundation 2', 'Term 1', 'Term 2', 'Term 3', 'Term 4'));
+
 
 -- Now add FK constraint on students.active_term_id idempotently
 DO $$
