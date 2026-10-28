@@ -130,7 +130,7 @@ export default function App() {
       <header className="header">
         <div className="header-logo">
           <div className="logo-icon">📚</div>
-          <h1>Teacher Tracker</h1>
+          <h1>Student Tracker</h1>
         </div>
         <div className="header-actions">
           <button className="btn btn-primary" onClick={() => setShowAddStudent(true)}>
