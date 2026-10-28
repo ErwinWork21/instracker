@@ -152,6 +152,12 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
                   {termData.term_number}
                 </span>
               )}
+              {termData?.status === 'Graduate' && (
+                <span className="tag tag-graduate">🎓 Graduate</span>
+              )}
+              {termData?.status === 'Completed' && (
+                <span className="tag tag-completed">✓ Completed</span>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -192,11 +198,32 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
 
         {/* Attendance summary */}
         {!loading && termData && (
-          <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
             <div className="stat-item">
               <span className="stat-label">Attendance</span>
               <span className="stat-value" style={{ color: attendanceCount >= 8 ? 'var(--success)' : 'var(--text-primary)' }}>
                 {attendanceCount} / 10
+              </span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Term Status</span>
+              <span
+                className="stat-value"
+                style={{
+                  color:
+                    termData.status === 'Graduate'
+                      ? '#c084fc'
+                      : termData.status === 'Completed'
+                      ? 'var(--success)'
+                      : 'var(--warning)',
+                  fontWeight: termData.status === 'Graduate' ? 700 : 600,
+                }}
+              >
+                {termData.status === 'Graduate'
+                  ? '🎓 Graduate'
+                  : termData.status === 'Completed'
+                  ? '✓ Completed'
+                  : termData.status}
               </span>
             </div>
             {attendanceCount >= 8 && progressUpdate?.status !== 'Completed' && (
@@ -242,6 +269,7 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
                   attendanceCount={attendanceCount}
                   studentId={student.id}
                   termId={termData.id}
+                  termData={termData}
                   onRefresh={loadStudentData}
                 />
               )}
@@ -252,6 +280,7 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
                   showAlert={showVideoAlert}
                   studentId={student.id}
                   termId={termData.id}
+                  termData={termData}
                   onRefresh={loadStudentData}
                 />
               )}

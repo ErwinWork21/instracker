@@ -102,6 +102,7 @@ export default function Dashboard({
           <option value="">Status Term (Semua)</option>
           <option value="On Progress">Term: On Progress</option>
           <option value="Completed">Term: Completed</option>
+          <option value="Graduate">Term: Graduate 🎓</option>
         </select>
 
         {/* SEPARATED: Filter Update Progress */}

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { formatDateTime } from '../utils'
+import { formatDateTime, computeTermStatus } from '../utils'
 import toast from 'react-hot-toast'
 
-export default function ProgressTab({ progressUpdate, attendanceCount, studentId, termId, onRefresh }) {
+export default function ProgressTab({ progressUpdate, attendanceCount, studentId, termId, termData, onRefresh }) {
   const [saving, setSaving] = useState(false)
   const alertActive = attendanceCount >= 8
 
@@ -15,12 +15,35 @@ export default function ProgressTab({ progressUpdate, attendanceCount, studentId
     setSaving(true)
     try {
       const now = new Date().toISOString()
-      const { error } = await supabase
+
+      // 1. Update progress_updates record
+      const { error: puErr } = await supabase
         .from('progress_updates')
         .update({ status: newStatus, updated_at: now })
         .eq('id', progressUpdate.id)
-      if (error) throw error
-      toast.success(`Progress Update set to ${newStatus}`)
+      if (puErr) throw puErr
+
+      // 2. Synchronize Term Status (Completed, Graduate for Term 4, or On Progress)
+      const companionVideoStatus = termData?.video_editing?.[0]?.status
+      const targetTermStatus = computeTermStatus(termData?.term_number, newStatus, companionVideoStatus)
+      const completedAt = (targetTermStatus === 'Completed' || targetTermStatus === 'Graduate') ? now : null
+
+      const { error: termErr } = await supabase
+        .from('terms')
+        .update({ status: targetTermStatus, completed_at: completedAt, updated_at: now })
+        .eq('id', termId)
+      if (termErr) {
+        console.warn('Could not update term status on terms table:', termErr)
+      }
+
+      if (targetTermStatus === 'Graduate') {
+        toast.success(`Progress Update set to ${newStatus} · Status Term 4 menjadi Graduate! 🎓`)
+      } else if (targetTermStatus === 'Completed') {
+        toast.success(`Progress Update set to ${newStatus} · Status ${termData?.term_number || 'Term'} menjadi Completed! ✓`)
+      } else {
+        toast.success(`Progress Update set to ${newStatus}`)
+      }
+
       await onRefresh()
     } catch (err) {
       toast.error('Error: ' + err.message)
@@ -84,9 +107,10 @@ export default function ProgressTab({ progressUpdate, attendanceCount, studentId
         </div>
       </div>
 
-      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        Progress Update is independent from Video Editing status.
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', background: 'var(--bg-input)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+        💡 <strong>Aturan Status Term:</strong> Jika Progress Update dan Video Editing keduanya <em>Completed</em>, status term otomatis menjadi <strong>Completed</strong> (atau <strong>Graduate 🎓</strong> jika di Term 4).
       </div>
     </div>
   )
 }
+

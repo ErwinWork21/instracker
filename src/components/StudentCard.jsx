@@ -56,8 +56,23 @@ export default function StudentCard({ student, onClick }) {
         </div>
         <div className="stat-item">
           <span className="stat-label">Term Status</span>
-          <span className="stat-value" style={{ color: activeTerm?.status === 'Completed' ? 'var(--success)' : 'var(--warning)' }}>
-            {activeTerm?.status || '—'}
+          <span
+            className="stat-value"
+            style={{
+              color:
+                activeTerm?.status === 'Graduate'
+                  ? '#c084fc'
+                  : activeTerm?.status === 'Completed'
+                  ? 'var(--success)'
+                  : 'var(--warning)',
+              fontWeight: activeTerm?.status === 'Graduate' ? 700 : 600,
+            }}
+          >
+            {activeTerm?.status === 'Graduate'
+              ? '🎓 Graduate'
+              : activeTerm?.status === 'Completed'
+              ? '✓ Completed'
+              : activeTerm?.status || '—'}
           </span>
         </div>
       </div>

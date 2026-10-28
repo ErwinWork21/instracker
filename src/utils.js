@@ -52,3 +52,18 @@ export function countAttendance(lessons) {
   if (!lessons) return 0
   return lessons.filter(l => l.attendance).length
 }
+
+/**
+ * Calculate Term Status based on Progress Update and Video Editing statuses:
+ * - If both are Completed:
+ *   - Term 4 => 'Graduate'
+ *   - Foundation 1-2 & Term 1-3 => 'Completed'
+ * - Otherwise => 'On Progress'
+ */
+export function computeTermStatus(termNumber, progressStatus, videoStatus) {
+  if (progressStatus === 'Completed' && videoStatus === 'Completed') {
+    return termNumber === 'Term 4' ? 'Graduate' : 'Completed'
+  }
+  return 'On Progress'
+}
+

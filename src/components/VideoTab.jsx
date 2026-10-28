@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import { formatDateTime, formatDate, shouldShowVideoEditingAlert } from '../utils'
+import { formatDateTime, formatDate, shouldShowVideoEditingAlert, computeTermStatus } from '../utils'
 import toast from 'react-hot-toast'
 
-export default function VideoTab({ videoEditing, lesson10, showAlert, studentId, termId, onRefresh }) {
+export default function VideoTab({ videoEditing, lesson10, showAlert, studentId, termId, termData, onRefresh }) {
   const [saving, setSaving] = useState(false)
 
   const lesson10Done = lesson10?.attendance === true
@@ -17,12 +17,35 @@ export default function VideoTab({ videoEditing, lesson10, showAlert, studentId,
     setSaving(true)
     try {
       const now = new Date().toISOString()
-      const { error } = await supabase
+
+      // 1. Update video_editing record
+      const { error: veErr } = await supabase
         .from('video_editing')
         .update({ status: newStatus, updated_at: now })
         .eq('id', videoEditing.id)
-      if (error) throw error
-      toast.success(`Video Editing set to ${newStatus}`)
+      if (veErr) throw veErr
+
+      // 2. Synchronize Term Status (Completed, Graduate for Term 4, or On Progress)
+      const companionProgressStatus = termData?.progress_updates?.[0]?.status
+      const targetTermStatus = computeTermStatus(termData?.term_number, companionProgressStatus, newStatus)
+      const completedAt = (targetTermStatus === 'Completed' || targetTermStatus === 'Graduate') ? now : null
+
+      const { error: termErr } = await supabase
+        .from('terms')
+        .update({ status: targetTermStatus, completed_at: completedAt, updated_at: now })
+        .eq('id', termId)
+      if (termErr) {
+        console.warn('Could not update term status on terms table:', termErr)
+      }
+
+      if (targetTermStatus === 'Graduate') {
+        toast.success(`Video Editing set to ${newStatus} · Status Term 4 menjadi Graduate! 🎓`)
+      } else if (targetTermStatus === 'Completed') {
+        toast.success(`Video Editing set to ${newStatus} · Status ${termData?.term_number || 'Term'} menjadi Completed! ✓`)
+      } else {
+        toast.success(`Video Editing set to ${newStatus}`)
+      }
+
       await onRefresh()
     } catch (err) {
       toast.error('Error: ' + err.message)
@@ -109,9 +132,10 @@ export default function VideoTab({ videoEditing, lesson10, showAlert, studentId,
         </div>
       </div>
 
-      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        Video Editing is independent from Progress Update status.
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', background: 'var(--bg-input)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+        💡 <strong>Aturan Status Term:</strong> Jika Progress Update dan Video Editing keduanya <em>Completed</em>, status term otomatis menjadi <strong>Completed</strong> (atau <strong>Graduate 🎓</strong> jika di Term 4).
       </div>
     </div>
   )
 }
+
