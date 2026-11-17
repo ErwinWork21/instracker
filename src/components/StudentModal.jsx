@@ -69,9 +69,37 @@ export default function StudentModal({ student: initialStudent, onClose, onRefre
   }
 
   const handleAddTerm = async () => {
-    // Find next term not yet used
+    // Find next term based on the last/current term
     const usedTerms = terms.map(t => t.term_number)
-    const nextTerm = TERM_OPTIONS.find(t => !usedTerms.includes(t))
+    
+    // Check the latest term created (or current active/selected term)
+    const lastTerm = terms[terms.length - 1]?.term_number || termData?.term_number
+    let nextTerm = null
+
+    if (lastTerm) {
+      const currentIndex = TERM_OPTIONS.indexOf(lastTerm)
+      if (currentIndex !== -1 && currentIndex + 1 < TERM_OPTIONS.length) {
+        // Try the subsequent term in the sequence
+        const candidate = TERM_OPTIONS[currentIndex + 1]
+        if (!usedTerms.includes(candidate)) {
+          nextTerm = candidate
+        }
+      }
+    }
+
+    // Fallback: next term in TERM_OPTIONS that is not used yet after the highest used index
+    if (!nextTerm) {
+      const highestUsedIndex = Math.max(...usedTerms.map(t => TERM_OPTIONS.indexOf(t)))
+      if (highestUsedIndex >= 0 && highestUsedIndex + 1 < TERM_OPTIONS.length) {
+        nextTerm = TERM_OPTIONS[highestUsedIndex + 1]
+      }
+    }
+
+    // Final fallback: any unused term
+    if (!nextTerm) {
+      nextTerm = TERM_OPTIONS.find(t => !usedTerms.includes(t))
+    }
+
     if (!nextTerm) { toast.error('All terms already created'); return }
 
     setAddingTerm(true)
